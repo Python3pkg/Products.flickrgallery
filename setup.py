@@ -27,6 +27,7 @@ setup(name='Products.flickrgallery',
           'setuptools',
           'Products.DataGridField',
           'collective.colorbox',
+          'flickrapi',
           # -*- Extra requirements: -*-
       ],
       extras_require = {'test':['plone.app.testing']},
