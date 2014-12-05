@@ -56,7 +56,7 @@ class FlickrAgent:
 			self._token,self._user = self.loadToken()
 		else:
 			self._token,self._user = token,user
-		self._serverProxy = ServerProxy('http://'+_host+_rpc_path)
+		self._serverProxy = ServerProxy('https://'+_host+_rpc_path)
 	def _createSig(self,kwargs):
 		str_sig = []
 		for key in kwargs.keys():
@@ -66,7 +66,7 @@ class FlickrAgent:
 	def authLoginURL(self,perms):
 		'''Issues a frob and returns a URL for the user to authorize a program
 		perms: read, write, delete'''
-		base = 'http://'+_host+_auth_path		
+		base = 'https://'+_host+_auth_path		
 		kwargs = {}
 		kwargs['api_key'] = self.api_key
 		kwargs['perms'] = perms
