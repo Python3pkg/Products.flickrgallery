@@ -41,7 +41,7 @@ from Products.DataGridField.Column import Column
 from Products.Archetypes.public import DisplayList
 
 ##code-section module-header #fill in your manual code here
-from flickrengine import flickrengine
+from .flickrengine import flickrengine
 ##/code-section module-header
 
 schema = Schema((

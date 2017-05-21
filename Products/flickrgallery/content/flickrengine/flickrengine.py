@@ -1,4 +1,4 @@
-import flickrlib
+from . import flickrlib
 from Products.flickrgallery.config import FLICKR_API_KEY,FLICKR_SECRET
 class FlickrAgent:
     """
@@ -7,7 +7,7 @@ class FlickrAgent:
         self.agent = flickrlib.FlickrAgent(FLICKR_API_KEY,FLICKR_SECRET)
         if username: #don't want to hit flickr unnecessarily
             self.person = self.agent.flickr.people.findByUsername(username=username)
-            self.userid = self.person[u'id']
+            self.userid = self.person['id']
              
 
     def showphotos( self,tags="",page='1',per_page='100',text='',group=''):
@@ -18,13 +18,13 @@ class FlickrAgent:
             photos = self.agent.flickr.photos.search(user_id=self.userid, tags=tags,per_page=per_page,page=page,text=text)
         #import pdb; pdb.set_trace()
         try:
-            for photo in photos[u'photo']:
-                farm = photo[u'farm']
-                server = photo[u'server']
+            for photo in photos['photo']:
+                farm = photo['farm']
+                server = photo['server']
                 #photo_info = self.getinfo(photo_id=photo[u'id'])
-                photo_id = photo[u'id']
-                photo_secret = photo[u'secret']
-                photo_title = photo[u'title']
+                photo_id = photo['id']
+                photo_secret = photo['secret']
+                photo_title = photo['title']
                 photourl = "http://farm%s.static.flickr.com/%s/%s_%s.jpg" % (farm,server,photo_id,photo_secret)
                 photourl_medium = "http://farm%s.static.flickr.com/%s/%s_%s_m.jpg" % (farm,server,photo_id,photo_secret)
                 photourl_small = "http://farm%s.static.flickr.com/%s/%s_%s_s.jpg" % (farm,server,photo_id,photo_secret)
@@ -34,18 +34,18 @@ class FlickrAgent:
                 imagesize=(photourl_small, photourl_medium, photourl_thumb, photourl_large)
                 list= [photourl,imagesize,photo_id, photo_title]
                 result.append(list)
-            return (result,photos[u'pages'])
+            return (result,photos['pages'])
         except KeyError:
-            return (result,photos[u'pages'])
+            return (result,photos['pages'])
     
     def getinfo(self, photo_id=""):
         temp = self.agent.flickr.photos.getInfo(photo_id=photo_id)
-        title = temp[u'title'][0][u'text']
-        desc = temp[u'description'][0][u'text']
-        license = temp[u'license']
+        title = temp['title'][0]['text']
+        desc = temp['description'][0]['text']
+        license = temp['license']
         lname = self.getlicense_name(license)   
                 
-        date_taken = temp[u'dates'][0][u'taken']
+        date_taken = temp['dates'][0]['taken']
         info = [title, desc, date_taken , lname]
         return info
 
@@ -53,10 +53,10 @@ class FlickrAgent:
         #import pdb; pdb.set_trace()
         name = ""
         temp_list =  self.agent.flickr.photos.licenses.getInfo()
-        license_list = temp_list[u'license']
+        license_list = temp_list['license']
         for item in license_list:
-           if item[u'id'] == license:
-              name = item[u'name']
+           if item['id'] == license:
+              name = item['name']
               break
 
         return name
@@ -64,20 +64,20 @@ class FlickrAgent:
  
     def getsizes(self, photo_id=""):
         temp = self.agent.flickr.photos.getSizes(photo_id=photo_id)
-        temp = temp[u'size'] 
-        sizeinfo = [(t[u'label'],t[u'source']) for t in temp]
+        temp = temp['size'] 
+        sizeinfo = [(t['label'],t['source']) for t in temp]
         return sizeinfo
 
     def generate_url(self, photo_id="", size="m", download="false"):
         """
         """
 
-        print "from flickr"
+        print("from flickr")
         photo = self.agent.flickr.photos.getInfo(photo_id=photo_id)
 
-        farm = photo[u'farm']
-        server = photo[u'server']
-        photo_secret = photo[u'secret']
+        farm = photo['farm']
+        server = photo['server']
+        photo_secret = photo['secret']
         photourl = "http://farm%s.static.flickr.com/%s/%s_%s.jpg" % (farm,server,photo_id,photo_secret)
         i = photourl.rindex('.')
         temp = [photourl[:i],  photourl[i:] ] 

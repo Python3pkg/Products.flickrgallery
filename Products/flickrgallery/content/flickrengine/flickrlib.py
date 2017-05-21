@@ -27,8 +27,8 @@ Public functions:	convertDate
 __version__ = "0.5"
 __all__ = ['FlickrAgent', 'convertDate', 'photoURL']
 
-import xml.dom.minidom, md5, os, httplib, time
-from xmlrpclib import ServerProxy
+import xml.dom.minidom, md5, os, http.client, time
+from xmlrpc.client import ServerProxy
 	
 _host='www.flickr.com'
 _rpc_path='/services/xmlrpc/'
@@ -59,7 +59,7 @@ class FlickrAgent:
 		self._serverProxy = ServerProxy('https://'+_host+_rpc_path)
 	def _createSig(self,kwargs):
 		str_sig = []
-		for key in kwargs.keys():
+		for key in list(kwargs.keys()):
 			str_sig.append('%s%s' % (key, kwargs[key]))
 		str_sig.sort()
 		return md5.new(self.ssecret + ''.join(str_sig)).hexdigest()
@@ -73,7 +73,7 @@ class FlickrAgent:
 		self.frob = kwargs['frob'] = self.flickr.auth.getFrob()['text']
 		api_sig = self._createSig(kwargs)
 		str_arg = []
-		for key in kwargs.keys():
+		for key in list(kwargs.keys()):
 			str_arg.append('%s=%s' % (key, kwargs[key]))
 		str_arg.append('api_sig=%s' % api_sig)
 		return base+'?'+'&'.join(str_arg)
@@ -86,7 +86,7 @@ class FlickrAgent:
 	def saveToken(self):
 		'''Saves the token in the running instance to disk'''
 		if not self._user or not self._token:
-			raise StandardError, 'No token or username in this instance'
+			raise Exception('No token or username in this instance')
 		if not os.path.exists(self._rcdir):
 			os.makedirs(self._rcdir)
 		f = file(os.path.join(self._rcdir, self._rcfile), 'w')
@@ -110,13 +110,13 @@ class FlickrAgent:
 		return self.__parseRecursively(dom.firstChild)
 	def __parseRecursively(self,element):
 		flickrDict = {}
-		flickrDict[u'type'] = element.nodeName
-		flickrDict[u'text'] = ''
-		for attrib in element.attributes.values():
+		flickrDict['type'] = element.nodeName
+		flickrDict['text'] = ''
+		for attrib in list(element.attributes.values()):
 			flickrDict[attrib.nodeName] = attrib.nodeValue
 		for node in element.childNodes:
 			if node.nodeType == xml.dom.Node.TEXT_NODE:
-				flickrDict[u'text'] += node.nodeValue.strip()
+				flickrDict['text'] += node.nodeValue.strip()
 			elif node.nodeType == xml.dom.Node.ELEMENT_NODE:
 				try:
 					flickrDict[node.nodeName].append(self.__parseRecursively(node))
@@ -130,7 +130,7 @@ class FlickrAgent:
 		return FlickrAgent.__dict__['_stop'](self,self.n,self.pid,**kwargs)   
 	def __getattr__(self,name):
 		if name in ('__str__','__repr__'): return lambda:'instance of %s at %s' % (str(self.__class__),id(self))
-		if not self.__dict__.has_key('n'):
+		if 'n' not in self.__dict__:
 			self.n=[]
 			self.pid = []
 		self.n.append(name)
@@ -150,7 +150,7 @@ class FlickrAgent:
 		return self.parseData(getattr(self._serverProxy, '.'.join(n))(kwargs))
 	def _upload(self,kwargs):
 		if not kwargs.get('filename'):
-			raise ValueError, 'Must provide a file name'
+			raise ValueError('Must provide a file name')
 		filename = kwargs.pop('filename')
 		if kwargs.get('title'):
 			title = kwargs.pop('title')
@@ -163,7 +163,7 @@ class FlickrAgent:
 		headers = {"Content-Type": "multipart/form-data; boundary=%s" % boundary[2:-34],
 				   "Host": "www.flickr.com"}
 		body = ''
-		for key in kwargs.keys():
+		for key in list(kwargs.keys()):
 			body += '%sname=%s\r\n\r\n%s\r\n' % (boundary,key,kwargs[key])
 		body += '%sname="photo"; filename="%s"\r\n' % (boundary, title)
 		body += 'Content-Type: image/jpeg\r\n\r\n'
@@ -172,7 +172,7 @@ class FlickrAgent:
 		image = f.read()
 		f.close()
 		post_data = body.encode("utf_8") + image + ("--%s--" % (boundary[:34])).encode("utf_8")
-		conn = httplib.HTTPConnection(_host)
+		conn = http.client.HTTPConnection(_host)
 		conn.request("POST", _upload_path, post_data, headers)
 		response = conn.getresponse().read()		
 		conn.close()
@@ -183,10 +183,10 @@ class FlickrAgent:
 def convertDate(date_str):
 	"""Convert a Flickr formated date to epoch"""
 	return time.mktime(
-		map(int,
+		list(map(int,
 	    	date_str.split(' ')[0].split('-') +
 	    	date_str.split(' ')[1].split(':') +
-	    	[0,0,0]))
+	    	[0,0,0])))
 
 def photoURL(photo,size=None,format='jpg'):
 	'''Return a URL for a photo.

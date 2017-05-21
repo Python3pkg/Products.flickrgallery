@@ -53,7 +53,7 @@ from Products.CMFCore import utils as cmfutils
 from Products.CMFPlone.utils import ToolInit
 from Products.GenericSetup import EXTENSION
 from Products.GenericSetup import profile_registry
-from config import *
+from .config import *
 
 DirectoryView.registerDirectory('skins', product_globals)
 DirectoryView.registerDirectory('skins/flickrgallery',
@@ -68,7 +68,7 @@ def initialize(context):
     ##/code-section custom-init-top
 
     # imports packages and types for registration
-    import content
+    from . import content
 
 
     # Initialize portal content
